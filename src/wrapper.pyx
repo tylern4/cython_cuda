@@ -7,12 +7,32 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
+from libc.math cimport sin, cos, sqrt
+
+
+
+cdef float MP = 0.93827208816
+cdef float E0 = 4.81726
+cdef float ME = 0.00051099895
+
+cdef float p_targ_px = 0.0
+cdef float p_targ_py = 0.0
+cdef float p_targ_pz = 0.0
+cdef float p_targ_E = MP
+
+cdef float e_beam_px = 0.0
+cdef float e_beam_py = 0.0
+cdef float e_beam_pz = sqrt(E0**2-ME**2)
+cdef float e_beam_E = E0
+
 
 cdef extern from "wrapper.hpp":
     void jacobi_cuda(long, long, float, float, float, float,
                  float*, float*, float, int)
     void initialize(long, long, float, float*, float*, float*, float*)
     bool print_cuda_properties()
+    vector[float] calc_W(vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
+    vector[float] calc_Q2(vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
 
 
 def jacobi(int n, int m, float alpha, float relax, float tol, int mits):
@@ -33,3 +53,47 @@ def jacobi(int n, int m, float alpha, float relax, float tol, int mits):
 
 def cuda_properties():
     return print_cuda_properties()
+
+def cuda_w(e_p, e_theta, e_phi):
+    x = calc_W(e_p, e_theta, e_phi)
+    return x
+
+def cuda_q2(e_p, e_theta, e_phi):
+    x = calc_Q2(e_p, e_theta, e_phi)
+    return x
+
+@np.vectorize
+def w(float e_p, float e_theta, float e_phi):
+    cdef float e_prime_px = e_p*sin(e_theta)*cos(e_phi)
+    cdef float e_prime_py = e_p*sin(e_theta)*sin(e_phi)
+    cdef float e_prime_pz = e_p*cos(e_theta)
+    cdef float e_prime_E = sqrt(e_prime_px**2 + e_prime_py**2 + e_prime_pz**2 - ME**2)
+    
+    cdef float temp_px = e_beam_px - e_prime_px + p_targ_px
+    cdef float temp_py = e_beam_py - e_prime_py + p_targ_py
+    cdef float temp_pz = e_beam_pz - e_prime_pz + p_targ_pz
+    cdef float temp_E = e_beam_E - e_prime_E + p_targ_E
+    
+    
+    cdef float temp2 = temp_px**2+temp_py**2+temp_pz**2-temp_E**2
+    cdef float temp3 = sqrt(-temp2)
+    
+    
+    return temp3
+
+
+@np.vectorize
+def q2(float e_p, float e_theta, float e_phi):
+    cdef float e_prime_px = e_p*sin(e_theta)*cos(e_phi)
+    cdef float e_prime_py = e_p*sin(e_theta)*sin(e_phi)
+    cdef float e_prime_pz = e_p*cos(e_theta)
+    cdef float e_prime_E = sqrt(e_prime_px**2 + e_prime_py**2 + e_prime_pz**2 - ME**2)
+    
+    cdef float temp_px = e_beam_px - e_prime_px
+    cdef float temp_py = e_beam_py - e_prime_py
+    cdef float temp_pz = e_beam_pz - e_prime_pz
+    cdef float temp_E = e_beam_E - e_prime_E
+
+    cdef float temp2 = temp_px**2+temp_py**2+temp_pz**2-temp_E**2
+
+    return temp2

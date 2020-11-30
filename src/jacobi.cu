@@ -117,124 +117,6 @@ bool print_cuda_properties(){
 
   return true;
 }
-// int main(int argc, char *argv[]) {
-//   long n = DEFAULT_DIMSIZE;
-//   long m = DEFAULT_DIMSIZE;
-//   REAL alpha = 0.0543;
-//   REAL tol = 0.0000000001;
-//   REAL relax = 1.0;
-//   int mits = 5000;
-
-//   if (argc == 2) {
-//     sscanf(argv[1], "%ld", &n);
-//     m = n;
-//   } else if (argc == 3) {
-//     sscanf(argv[1], "%ld", &n);
-//     sscanf(argv[2], "%ld", &m);
-//   } else if (argc == 4) {
-//     sscanf(argv[1], "%ld", &n);
-//     sscanf(argv[2], "%ld", &m);
-//     sscanf(argv[3], "%g", &alpha);
-//   } else if (argc == 5) {
-//     sscanf(argv[1], "%ld", &n);
-//     sscanf(argv[2], "%ld", &m);
-//     sscanf(argv[3], "%g", &alpha);
-//     sscanf(argv[4], "%g", &tol);
-//   } else if (argc == 6) {
-//     sscanf(argv[1], "%ld", &n);
-//     sscanf(argv[2], "%ld", &m);
-//     sscanf(argv[3], "%g", &alpha);
-//     sscanf(argv[4], "%g", &tol);
-//     sscanf(argv[5], "%g", &relax);
-//   } else if (argc == 7) {
-//     sscanf(argv[1], "%ld", &n);
-//     sscanf(argv[2], "%ld", &m);
-//     sscanf(argv[3], "%g", &alpha);
-//     sscanf(argv[4], "%g", &tol);
-//     sscanf(argv[5], "%g", &relax);
-//     sscanf(argv[6], "%d", &mits);
-//   } else {
-//     fprintf(stderr, "Usage: jacobi [<n> <m> <alpha> <tol> <relax> <mits>]\n");
-//     fprintf(stderr, "\tn - grid dimension in x direction, default: %ld\n", n);
-//     fprintf(
-//         stderr,
-//         "\tm - grid dimension in y direction, default: n if provided or %ld\n",
-//         m);
-//     fprintf(
-//         stderr,
-//         "\talpha - Helmholtz constant (always greater than 0.0), default: %g\n",
-//         alpha);
-//     fprintf(stderr,
-//             "\ttol   - error tolerance for iterative solver, default: %g\n",
-//             tol);
-//     fprintf(stderr,
-//             "\trelax - Successice over relaxation parameter, default: %g\n",
-//             relax);
-//     fprintf(stderr,
-//             "\tmits  - Maximum iterations for iterative solver, default: %d\n",
-//             mits);
-//   }
-
-//   printf("jacobi %ld %ld %g %g %g %d\n", n, m, alpha, tol, relax, mits);
-//   printf("---------------------------------------------------------------\n");
-//   /** init the array */
-
-//   REAL *u = (REAL *)malloc(sizeof(REAL) * n * m);
-//   REAL *f = (REAL *)malloc(sizeof(REAL) * n * m);
-
-//   REAL *ucuda = (REAL *)malloc(sizeof(REAL) * n * m);
-//   REAL *fcuda = (REAL *)malloc(sizeof(REAL) * n * m);
-
-//   REAL dx; /* grid spacing in x direction */
-//   REAL dy; /* grid spacing in y direction */
-
-//   initialize(n, m, alpha, &dx, &dy, u, f);
-
-//   memcpy(ucuda, u, n * m * sizeof(REAL));
-//   memcpy(fcuda, f, n * m * sizeof(REAL));
-
-//   cudaDeviceProp deviceProp;
-//   cudaGetDeviceProperties(&deviceProp, 0);
-//   // Free speed
-//   REAL *cuda_temp = (REAL *)malloc(sizeof(REAL));
-//   cudaMalloc(&cuda_temp, (sizeof(REAL)));
-
-//   printf("===================== Sequential Execution =====================\n");
-//   double elapsed_seq = read_timer_ms();
-//   jacobi_seq(n, m, dx, dy, alpha, relax, u, f, tol, mits);
-//   elapsed_seq = read_timer_ms() - elapsed_seq;
-//   printf("\n");
-
-//   printf("===================== GPU CUDA Execution =====================\n");
-
-//   double elapsed_cuda = read_timer_ms();
-//   jacobi_cuda(n, m, dx, dy, alpha, relax, ucuda, fcuda, tol, mits);
-//   elapsed_cuda = read_timer_ms() - elapsed_cuda;
-//   printf("\n");
-
-// #if CORRECTNESS_CHECK
-//   print_array("Sequential Run", "u", (REAL *)u, n, m);
-//   print_array("GPU Run       ", "ucuda", (REAL *)ucuda, n, m);
-// #endif
-
-//   double flops = mits * (n - 2) * (m - 2) * 13;
-//   printf("---------------------------------------------------------------\n");
-//   printf("Performance:\tRuntime(ms)\tMFLOPS\t\tError\n");
-//   printf("---------------------------------------------------------------\n");
-//   printf("base:\t\t%.2f\t\t%.2f\t\t%g\n", elapsed_seq,
-//          flops / (1.0e3 * elapsed_seq), error_check(n, m, alpha, dx, dy, u, f));
-//   printf("GPU :\t\t%.2f\t\t%.2f\t\t%g\n", elapsed_cuda,
-//          flops / (1.0e3 * elapsed_cuda),
-//          error_check(n, m, alpha, dx, dy, ucuda, fcuda));
-
-//   free(u);
-//   free(f);
-//   free(ucuda);
-//   free(fcuda);
-//   cudaFree(cuda_temp);
-
-//   return 0;
-// }
 
 /*      subroutine jacobi (n,m,dx,dy,alpha,omega,u,f,tol,mits)
  ******************************************************************
@@ -256,61 +138,7 @@ bool print_cuda_properties(){
  *
  * Output : u(n,m) - Solution
  *****************************************************************/
-void jacobi_seq(long n, long m, REAL dx, REAL dy, REAL alpha, REAL omega,
-                REAL *u_p, REAL *f_p, REAL tol, int mits) {
-  long i, j, k;
-  REAL error;
-  REAL ax;
-  REAL ay;
-  REAL b;
-  REAL resid;
-  REAL uold[n][m];
-  REAL(*u)[m] = (REAL(*)[m])u_p;
-  REAL(*f)[m] = (REAL(*)[m])f_p;
-  /*
-   * Initialize coefficients */
-  /* X-direction coef */
-  ax = (1.0 / (dx * dx));
-  /* Y-direction coef */
-  ay = (1.0 / (dy * dy));
-  /* Central coeff */
-  b = (((-2.0 / (dx * dx)) - (2.0 / (dy * dy))) - alpha);
-  error = (10.0 * tol);
-  k = 1;
-  while ((k <= mits) && (error > tol)) {
-    error = 0.0;
 
-    /* Copy new solution into old */
-    for (i = 0; i < n; i++)
-      for (j = 0; j < m; j++)
-        uold[i][j] = u[i][j];
-
-    for (i = 1; i < (n - 1); i++)
-      for (j = 1; j < (m - 1); j++) {
-        resid = (ax * (uold[i - 1][j] + uold[i + 1][j]) +
-                 ay * (uold[i][j - 1] + uold[i][j + 1]) + b * uold[i][j] -
-                 f[i][j]) /
-                b;
-        // printf("i: %d, j: %d, resid: %f\n", i, j, resid);
-
-        u[i][j] = uold[i][j] - omega * resid;
-        error = error + resid * resid;
-      }
-    /* Error check */
-    if (k % 500 == 0)
-      printf("Finished %ld iteration with error: %g\n", k, error);
-    error = sqrt(error) / (n * m);
-
-    k = k + 1;
-  } /*  End iteration loop */
-  printf("Total Number of Iterations: %ld\n", k);
-  printf("Residual: %.15g\n", error);
-}
-
-/**
- * TODO #1: jacobi_kernel implementation of the double-nested loop for
- * computation
- */
 __constant__ float c_ax;
 __constant__ float c_ay;
 __constant__ float c_b;
@@ -392,7 +220,7 @@ void jacobi_cuda(long n, long m, REAL dx, REAL dy, REAL alpha, REAL omega,
     cuda_u = cuda_uold;
     cuda_uold = temp;
     /* TODO #5: launch jacobi_kernel */
-    jacobi_kernel << <dimGrid, dimBlock>>>
+    jacobi_kernel <<<dimGrid, dimBlock>>>
         (cuda_u, cuda_uold, cuda_resid, cuda_f);
     /* TODO #6: compute error on CPU or GPU. error is calculated by accumulating
     *          resid*resid computed by each thread. There are multiple
@@ -429,7 +257,5 @@ void jacobi_cuda(long n, long m, REAL dx, REAL dy, REAL alpha, REAL omega,
   cudaFree(cuda_resid);
   printf("Total Number of Iterations: %ld\n", k);
   printf("Residual: %.15g\n", error);
-
-  
 
 }
