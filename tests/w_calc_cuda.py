@@ -12,22 +12,25 @@ start = time.time()
 w = wrapper.cuda_w(df.e_p.to_numpy(), np.deg2rad(
     df.e_theta), np.deg2rad(df.e_phi))
 total = time.time() - start
-print("W: ", total/df.e_p.to_numpy().size, "Hz")
+print("cuda W: ", df.e_p.to_numpy().size/total/1E6, "MHz")
 
 start = time.time()
-w = wrapper.w(df.e_p.to_numpy(), np.deg2rad(
-    df.e_theta), np.deg2rad(df.e_phi))
+for i in range(100):
+    w = wrapper.cuda_w(df.e_p.to_numpy(), np.deg2rad(
+        df.e_theta), np.deg2rad(df.e_phi))
 total = time.time() - start
-print("W: ", total/df.e_p.to_numpy().size, "Hz")
+print("W: ", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
 start = time.time()
 q2 = wrapper.cuda_q2(df.e_p.to_numpy(), np.deg2rad(
     df.e_theta), np.deg2rad(df.e_phi))
 total = time.time() - start
-print("Q2: ", total/df.e_p.to_numpy().size, "Hz")
+print("Q2: ", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
 start = time.time()
 q2 = wrapper.q2(df.e_p.to_numpy(), np.deg2rad(
     df.e_theta), np.deg2rad(df.e_phi))
 total = time.time() - start
-print("Q2: ", total/df.e_p.to_numpy().size, "Hz")
+print("Q2: ", (df.e_p.to_numpy().size/total)/1E6, "MHz")
+
+# image = wrapper.jacobi(512, 512, 0.0543, 1.0, 0.00000001, 50000)

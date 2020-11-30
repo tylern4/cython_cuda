@@ -14,7 +14,7 @@ add_library(compute_lib STATIC
 # Request that particles be built with -std=c++11
 # As this is a public compile feature anything that links to 
 # particles will also build with -std=c++11
-target_compile_features(compute_lib PUBLIC cxx_std_17)
+target_compile_features(compute_lib PUBLIC cxx_std_14)
  
 # We need to explicitly state that we need all CUDA files in the 
 # particle library to be built with -dc as the member functions 

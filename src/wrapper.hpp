@@ -4,7 +4,7 @@
 #define REAL float
 #define BLOCK_SIZE 16
 // flexible between REAL and double
-#define DEFAULT_DIMSIZE 256
+#define DEFAULT_DIMSIZE 1024
 // std::vector<float> calc_W(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
 
 // float calc_q2(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);

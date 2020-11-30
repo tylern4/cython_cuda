@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
     REAL alpha = 0.0543;
     REAL tol = 0.0000000001;
     REAL relax = 1.0;
-    int mits = 10000;
+    int mits = 100000;
 
     REAL *u = (REAL *)malloc(sizeof(REAL) * n * m);
     REAL *f = (REAL *)malloc(sizeof(REAL) * n * m);

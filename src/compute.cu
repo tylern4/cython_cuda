@@ -2,6 +2,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <chrono>
+#include "wrapper.hpp"
 
 __constant__ float MP = 0.93827208816;
 __constant__ float E0 = 4.81726;
@@ -17,9 +18,11 @@ __constant__ float e_beam_py = 0.0;
 __constant__ float e_beam_pz = 4.81726;
 __constant__ float e_beam_E = 4.81726;
 
+
+
 __global__
 void W_kernel(float* e_p, float* e_theta, float* e_phi, float* out) {
-    int tid = blockIdx.x;
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     float e_prime_px = e_p[tid]*sinf(e_theta[tid])*cosf(e_phi[tid]);
     float e_prime_py = e_p[tid]*sinf(e_theta[tid])*sinf(e_phi[tid]);
@@ -65,7 +68,8 @@ std::vector<float> calc_W(std::vector<float> e_p, std::vector<float> e_theta, st
     float *out = (float *)malloc(size);
 
     // Call kernel for each in N do 1
-    W_kernel <<<N, 1>>> (_e_p, _e_theta, _e_phi, _out);
+    W_kernel <<<N, 1>>>(_e_p, _e_theta, _e_phi, _out);
+
     // Copy output from device
     cudaMemcpy(out, _out, size, cudaMemcpyDeviceToHost);
 
@@ -77,13 +81,18 @@ std::vector<float> calc_W(std::vector<float> e_p, std::vector<float> e_theta, st
     std::cout << N / elapsed_full.count() << " Hz" << std::endl;
 #endif
 
+    cudaFree(_e_p);
+    cudaFree(_e_theta);
+    cudaFree(_e_phi);
+    cudaFree(_out);
+
     return vec;
 }
 
 
 __global__ 
 void q2_kernel(float* e_p, float* e_theta, float* e_phi, float* out){
-    int tid = blockIdx.x;
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     float e_prime_px = e_p[tid]*sinf(e_theta[tid])*cosf(e_phi[tid]);
     float e_prime_py = e_p[tid]*sinf(e_theta[tid])*sinf(e_phi[tid]);
@@ -130,6 +139,7 @@ std::vector<float> calc_Q2(std::vector<float> e_p, std::vector<float> e_theta, s
 
     // Call kernel for each in N do 1
     q2_kernel <<<N, 1>>> (_e_p, _e_theta, _e_phi, _out);
+
     // Copy output from device
     cudaMemcpy(out, _out, size, cudaMemcpyDeviceToHost);
 
@@ -140,6 +150,11 @@ std::vector<float> calc_Q2(std::vector<float> e_p, std::vector<float> e_theta, s
     std::chrono::duration<double> elapsed_full = (std::chrono::high_resolution_clock::now() - start);
     std::cout << N / elapsed_full.count() << " Hz" << std::endl;
 #endif
+
+    cudaFree(_e_p);
+    cudaFree(_e_theta);
+    cudaFree(_e_phi);
+    cudaFree(_out);
 
     return vec;
 }
