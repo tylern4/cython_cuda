@@ -99,16 +99,21 @@ void jacobi_cuda(long n, long m, REAL dx, REAL dy, REAL alpha, REAL relax,
                  REAL *u_p, REAL *f_p, REAL tol, int mits);
 
 
-bool init_cuda(){
+bool print_cuda_properties(){
   try{
     cudaDeviceProp deviceProp;
     cudaGetDeviceProperties(&deviceProp, 0);
+    std::cout << deviceProp.name << std::endl;
+    std::cout << "Total Memory:\t\t" << deviceProp.totalGlobalMem/1E9 << " GB" << std::endl;
+    std::cout << "Warp Size:\t\t" << deviceProp.warpSize << std::endl;
+    std::cout << "Max Threads Per Block:\t" << deviceProp.maxThreadsPerBlock << std::endl;
+    std::cout << "Clock Speed:\t\t" << deviceProp.clockRate/1E6 << " GHz"<< std::endl;
+    std::cout << "Multi Processor Count:\t" << deviceProp.multiProcessorCount << std::endl;
 
   } catch(const std::exception& e) {
     std::cerr << e.what() << '\n';
     return false;
   }
-
 
   return true;
 }

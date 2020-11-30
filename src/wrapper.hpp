@@ -22,3 +22,5 @@ void jacobi_seq(long n, long m, float dx, float dy, float alpha, float relax,
                 float *u_p, float *f_p, float tol, int mits);
 void jacobi_cuda(long n, long m, float dx, float dy, float alpha, float relax,
                  float *u_p, float *f_p, float tol, int mits);
+
+bool print_cuda_properties();
