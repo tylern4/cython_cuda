@@ -39,37 +39,38 @@ def slow_w(e_p, e_theta, e_phi):
     return temp3
 
 
-wrapper.cuda_properties()
+if __name__ == "__main__":
+    # wrapper.cuda_properties()
 
-df = pd.read_csv("/mnt/ssd/kincorr/momCorr.csv")
+    df = pd.read_csv("/mnt/ssd/kincorr/momCorr.csv")
 
-print("size ", df.e_p.to_numpy().size)
+    print("size ", df.e_p.to_numpy().size)
 
-# start = time.time()
-# w = slow_w(df.e_p.to_numpy(), np.deg2rad(
-#     df.e_theta), np.deg2rad(df.e_phi))
-# total = time.time() - start
-# print("Slow W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
+    # start = time.time()
+    # w = slow_w(df.e_p.to_numpy(), np.deg2rad(
+    #     df.e_theta), np.deg2rad(df.e_phi))
+    # total = time.time() - start
+    # print("Slow W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
-start = time.time()
-w = wrapper.cython_w(df.e_p.to_numpy(),
-                     np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
-total = time.time() - start
-print("cython W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
+    start = time.time()
+    w = wrapper.cython_w(df.e_p.to_numpy(),
+                         np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
+    total = time.time() - start
+    print("cython W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
-start = time.time()
-w = wrapper.cuda_w(df.e_p.to_numpy(),
-                   np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
-total = time.time() - start
-print("cuda W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
+    start = time.time()
+    w = wrapper.cuda_w(4.81726, df.e_p.to_numpy(),
+                       np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
+    total = time.time() - start
+    print("cuda W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
-start = time.time()
-q2 = wrapper.cuda_q2(df.e_p.to_numpy(),
-                     np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
-total = time.time() - start
-print("cuda Q2: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
+    start = time.time()
+    q2 = wrapper.cuda_q2(4.81726, df.e_p.to_numpy(),
+                         np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
+    total = time.time() - start
+    print("cuda Q2: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
-y, x = bh.numpy.histogram(w, bins=500, range=(0, 3.0), threads=4)
-x = (x[1:] + x[:-1]) / 2.0
-plt.errorbar(x, y, marker=".", yerr=stats.sem(y), linestyle="",)
-plt.savefig("W_hist.png")
+    y, x = bh.numpy.histogram(w, bins=500, range=(0, 3.0), threads=4)
+    x = (x[1:] + x[:-1]) / 2.0
+    plt.errorbar(x, y, marker=".", yerr=stats.sem(y), linestyle="",)
+    plt.savefig("W_hist.png")

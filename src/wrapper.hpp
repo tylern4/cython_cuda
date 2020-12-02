@@ -25,5 +25,5 @@ void jacobi_cuda(long n, long m, float dx, float dy, float alpha, float relax, f
 
 bool print_cuda_properties();
 
-std::vector<float> calc_W(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
-std::vector<float> calc_Q2(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
+std::vector<float> calc_W(float beam_E, std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
+std::vector<float> calc_Q2(float beam_E, std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);

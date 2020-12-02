@@ -31,8 +31,8 @@ cdef extern from "wrapper.hpp":
                  float*, float*, float, int)
     void initialize(long, long, float, float*, float*, float*, float*)
     bool print_cuda_properties()
-    vector[float] calc_W(vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
-    vector[float] calc_Q2(vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
+    vector[float] calc_W(float beam_E, vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
+    vector[float] calc_Q2(float beam_E, vector[float] e_p, vector[float] e_theta, vector[float] e_phi)
 
 
 def jacobi(int n, int m, float alpha, float relax, float tol, int mits):
@@ -54,12 +54,12 @@ def jacobi(int n, int m, float alpha, float relax, float tol, int mits):
 def cuda_properties():
     return print_cuda_properties()
 
-def cuda_w(e_p, e_theta, e_phi):
-    x = calc_W(e_p, e_theta, e_phi)
+def cuda_w(beam_E, e_p, e_theta, e_phi):
+    x = calc_W(beam_E, e_p, e_theta, e_phi)
     return x
 
-def cuda_q2(e_p, e_theta, e_phi):
-    x = calc_Q2(e_p, e_theta, e_phi)
+def cuda_q2(beam_E, e_p, e_theta, e_phi):
+    x = calc_Q2(beam_E, e_p, e_theta, e_phi)
     return x
 
 @np.vectorize

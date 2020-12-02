@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
 project(cmake_and_cuda LANGUAGES C Fortran CXX CUDA)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
+
 set(CMAKE_MODULE_PATH
    ${CMAKE_MODULE_PATH}
    ${PROJECT_SOURCE_DIR}/cmake)
