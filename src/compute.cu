@@ -12,7 +12,7 @@ __device__ float p_targ_py = 0.0;
 __device__ float p_targ_pz = 0.0;
 __device__ float p_targ_E = 0.93827208816;
 
-__device__ float _beam_E;
+__constant__ float _beam_E;
 
 __device__ float norm2(const float& x, const float& y, const float& z, const float& e){
     return x*x + y*y + z*z - e*e;
@@ -29,7 +29,7 @@ __global__ void W_kernel(float* e_p, float* e_theta, float* e_phi, float* out) {
 
     float e_beam_px = 0;
     float e_beam_py = 0;
-    float e_beam_pz = norm(0,0, _beam_E, _beam_E);
+    float e_beam_pz = sqrt(_beam_E*_beam_E-ME*ME);
     float e_beam_E = _beam_E;
 
     float e_prime_px = e_p[tid]*sinf(e_theta[tid])*cosf(e_phi[tid]);
@@ -50,7 +50,7 @@ __global__ void q2_kernel(float* e_p, float* e_theta, float* e_phi, float* out){
 
     float e_beam_px = 0;
     float e_beam_py = 0;
-    float e_beam_pz = norm(0, 0, _beam_E, _beam_E);
+    float e_beam_pz = sqrt(_beam_E*_beam_E-ME*ME);
     float e_beam_E = _beam_E;
 
     float e_prime_px = e_p[tid]*sinf(e_theta[tid])*cosf(e_phi[tid]);
@@ -78,11 +78,9 @@ std::vector<float> calc_W(float beam_E, std::vector<float> e_p, std::vector<floa
     float *_e_p;
     float *_e_theta;
     float *_e_phi;
-    float *_beam_E;
     cudaMalloc((void **)&_e_p, size);
     cudaMalloc((void **)&_e_theta, size);
     cudaMalloc((void **)&_e_phi, size);
-    cudaMalloc((void **)&_beam_E, sizeof(REAL));
 
     // Make and malloc output vector
     float *_out;
@@ -132,11 +130,9 @@ std::vector<float> calc_Q2(float beam_E, std::vector<float> e_p, std::vector<flo
     float *_e_p;
     float *_e_theta;
     float *_e_phi;
-    float *_beam_E;
     cudaMalloc((void **)&_e_p, size);
     cudaMalloc((void **)&_e_theta, size);
     cudaMalloc((void **)&_e_phi, size);
-    cudaMalloc((void **)&_beam_E, sizeof(REAL));
 
     // Make and malloc output vector
     float *_out;

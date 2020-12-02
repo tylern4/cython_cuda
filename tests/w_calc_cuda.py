@@ -46,15 +46,9 @@ if __name__ == "__main__":
 
     print("size ", df.e_p.to_numpy().size)
 
-    # start = time.time()
-    # w = slow_w(df.e_p.to_numpy(), np.deg2rad(
-    #     df.e_theta), np.deg2rad(df.e_phi))
-    # total = time.time() - start
-    # print("Slow W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
-
     start = time.time()
-    w = wrapper.cython_w(df.e_p.to_numpy(),
-                         np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
+    w_c = wrapper.cython_w(df.e_p.to_numpy(),
+                           np.deg2rad(df.e_theta), np.deg2rad(df.e_phi))
     total = time.time() - start
     print("cython W: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
@@ -70,7 +64,13 @@ if __name__ == "__main__":
     total = time.time() - start
     print("cuda Q2: ", total, "sec", (df.e_p.to_numpy().size/total)/1E6, "MHz")
 
-    y, x = bh.numpy.histogram(w, bins=500, range=(0, 3.0), threads=4)
+    y1, x1 = bh.numpy.histogram(w, bins=500, range=(0, 3.0), threads=4)
+    x1 = (x1[1:] + x1[:-1]) / 2.0
+    plt.errorbar(x1, y1, marker=".", yerr=stats.sem(
+        y1), linestyle="", alpha=0.3)
+
+    y, x = bh.numpy.histogram(w_c, bins=500, range=(0, 3.0), threads=4)
     x = (x[1:] + x[:-1]) / 2.0
-    plt.errorbar(x, y, marker=".", yerr=stats.sem(y), linestyle="",)
+    plt.errorbar(x, y, marker=".", yerr=stats.sem(y), linestyle="", alpha=0.3)
+
     plt.savefig("W_hist.png")
