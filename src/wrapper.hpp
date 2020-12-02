@@ -1,5 +1,5 @@
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #define REAL float
 #define BLOCK_SIZE 16
@@ -18,10 +18,10 @@ bool init_cuda();
  ******************************************************/
 void initialize(long n, long m, REAL alpha, REAL *dx, REAL *dy, REAL *u_p, REAL *f_p);
 
-void jacobi_seq(long n, long m, float dx, float dy, float alpha, float relax,
-                float *u_p, float *f_p, float tol, int mits);
-void jacobi_cuda(long n, long m, float dx, float dy, float alpha, float relax,
-                 float *u_p, float *f_p, float tol, int mits);
+void jacobi_seq(long n, long m, float dx, float dy, float alpha, float relax, float *u_p, float *f_p, float tol,
+                int mits);
+void jacobi_cuda(long n, long m, float dx, float dy, float alpha, float relax, float *u_p, float *f_p, float tol,
+                 int mits);
 
 bool print_cuda_properties();
 

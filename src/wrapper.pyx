@@ -63,7 +63,7 @@ def cuda_q2(e_p, e_theta, e_phi):
     return x
 
 @np.vectorize
-def w(float e_p, float e_theta, float e_phi):
+def cython_w(float e_p, float e_theta, float e_phi):
     cdef float e_prime_px = e_p*sin(e_theta)*cos(e_phi)
     cdef float e_prime_py = e_p*sin(e_theta)*sin(e_phi)
     cdef float e_prime_pz = e_p*cos(e_theta)
@@ -78,12 +78,11 @@ def w(float e_p, float e_theta, float e_phi):
     cdef float temp2 = temp_px**2+temp_py**2+temp_pz**2-temp_E**2
     cdef float temp3 = sqrt(-temp2)
     
-    
     return temp3
 
 
 @np.vectorize
-def q2(float e_p, float e_theta, float e_phi):
+def cython_q2(float e_p, float e_theta, float e_phi):
     cdef float e_prime_px = e_p*sin(e_theta)*cos(e_phi)
     cdef float e_prime_py = e_p*sin(e_theta)*sin(e_phi)
     cdef float e_prime_pz = e_p*cos(e_theta)
