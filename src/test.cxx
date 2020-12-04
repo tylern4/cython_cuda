@@ -1,14 +1,15 @@
-#include "wrapper.hpp"
 #include <iostream>
+#include "wrapper.hpp"
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
+    print_cuda_properties();
+
     long n = DEFAULT_DIMSIZE;
     long m = DEFAULT_DIMSIZE;
     REAL alpha = 0.0543;
     REAL tol = 0.0000000001;
     REAL relax = 1.0;
-    int mits = 100000;
+    int mits = 1000;
 
     REAL *u = (REAL *)malloc(sizeof(REAL) * n * m);
     REAL *f = (REAL *)malloc(sizeof(REAL) * n * m);
