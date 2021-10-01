@@ -5,25 +5,40 @@
 #define BLOCK_SIZE 16
 // flexible between REAL and double
 #define DEFAULT_DIMSIZE 1024
-// std::vector<float> calc_W(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
-
-// float calc_q2(std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
 
 bool init_cuda();
-/*      subroutine initialize (n,m,alpha,dx,dy,u,f)
- ******************************************************
- * Initializes data
- * Assumes exact solution is u(x,y) = (1-x^2)*(1-y^2)
- *
- ******************************************************/
-void initialize(long n, long m, REAL alpha, REAL *dx, REAL *dy, REAL *u_p, REAL *f_p);
 
-void jacobi_seq(long n, long m, float dx, float dy, float alpha, float relax, float *u_p, float *f_p, float tol,
-                int mits);
-void jacobi_cuda(long n, long m, float dx, float dy, float alpha, float relax, float *u_p, float *f_p, float tol,
-                 int mits);
 
-bool print_cuda_properties();
+bool print_cuda_properties(){
+  try{
+    int nDevices;
 
-std::vector<float> calc_W(float beam_E, std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
-std::vector<float> calc_Q2(float beam_E, std::vector<float> e_p, std::vector<float> e_theta, std::vector<float> e_phi);
+    cudaGetDeviceCount(&nDevices);
+    for (int i = 0; i < nDevices; i++) {
+      cudaDeviceProp prop;
+      cudaGetDeviceProperties(&prop, i);
+      printf("Device Number: %d\n", i+1);
+      printf("  Device name: %s\n", prop.name);
+      printf("  Memory Clock Rate (KHz): %d\n",
+            prop.memoryClockRate);
+      printf("  Memory Bus Width (bits): %d\n",
+            prop.memoryBusWidth);
+      printf("  Peak Memory Bandwidth (GB/s): %f\n\n",
+            2.0*prop.memoryClockRate*(prop.memoryBusWidth/8)/1.0e6);
+    }
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
+    std::cout << deviceProp.name << std::endl;
+    std::cout << "Total Memory:\t\t" << deviceProp.totalGlobalMem/1E9 << " GB" << std::endl;
+    std::cout << "Warp Size:\t\t" << deviceProp.warpSize << std::endl;
+    std::cout << "Max Threads Per Block:\t" << deviceProp.maxThreadsPerBlock << std::endl;
+    std::cout << "Clock Speed:\t\t" << deviceProp.clockRate/1E6 << " GHz"<< std::endl;
+    std::cout << "Multi Processor Count:\t" << deviceProp.multiProcessorCount << std::endl;
+
+  } catch(const std::exception& e) {
+    std::cerr << e.what() << '\n';
+    return false;
+  }
+
+  return true;
+}
