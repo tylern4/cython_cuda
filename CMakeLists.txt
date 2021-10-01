@@ -1,33 +1,31 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
-project(cmake_and_cuda LANGUAGES C Fortran CXX CUDA)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+cmake_minimum_required(VERSION 3.20)
+project(saxpy LANGUAGES C CXX)
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Ofast")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
+# Set build type
+set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_STANDARD 17)
+find_package(CUDA REQUIRED)
+include_directories("${CUDA_INCLUDE_DIRS}")
 
-set(CMAKE_MODULE_PATH
-   ${CMAKE_MODULE_PATH}
-   ${PROJECT_SOURCE_DIR}/cmake)
- 
-add_library(compute_lib STATIC
-    src/compute.cu
-)
- 
-# Request that particles be built with -std=c++11
-# As this is a public compile feature anything that links to 
-# particles will also build with -std=c++11
-target_compile_features(compute_lib PUBLIC cxx_std_14)
- 
-# We need to explicitly state that we need all CUDA files in the 
-# particle library to be built with -dc as the member functions 
-# could be called by other libraries and executables
-set_target_properties(compute_lib
-                       PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
- 
-add_executable(test src/test.cxx)
- 
-set_property(TARGET compute_lib
-             PROPERTY CUDA_SEPARABLE_COMPILATION ON)
+# Build Options
+option(TARGET_GPU "Enable OpenACC GPU       Support" OFF)
+option(TARGET_CPU "Enable OpenACC Multicore support" OFF)
 
-target_link_libraries(test PRIVATE compute_lib)
+if(TARGET_CPU OR TARGET_GPU)
+    find_package(OpenACC REQUIRED)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenACC_C_FLAGS} -Minfo=accel")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenACC_CXX_FLAGS} -Minfo=accel")
+endif()
 
+add_executable(testbin src/test.cxx)
+
+
+if(TARGET_CPU)
+    set(TARGET_ACCEL "-ta=multicore")
+    set(TARGET_STDPAR "-stdpar=multicore")
+elseif(TARGET_GPU)
+    set(TARGET_STDPAR "-acc=gpu")
+endif()
+
+target_compile_options(testbin PUBLIC ${TARGET_ACCEL})

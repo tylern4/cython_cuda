@@ -1,12 +1,6 @@
 #include <iostream>
 #include <vector>
-
-#define REAL float
-#define BLOCK_SIZE 16
-// flexible between REAL and double
-#define DEFAULT_DIMSIZE 1024
-
-bool init_cuda();
+#include "cuda_runtime_api.h"
 
 
 bool print_cuda_properties(){
