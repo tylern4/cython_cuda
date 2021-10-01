@@ -1,34 +1,40 @@
 #include <iostream>
-#include "wrapper.hpp"
+#include <vector>
+#include <omp.h>
+//#include "wrapper.hpp"
 
-void spmv(float *a, float *v, float *x, int nrows, int* rowndx, int* colndx) {
+void spmv(std::vector<float> a, std::vector<float> v, std::vector<float> x, int nrows) {
 
-    // int num_gpus = acc_get_num_devices(acc_device_nvidia);
+    float val=0.0f;
+    int num_threads = omp_get_num_procs();
 
-    // #pragma omp parallel num_threads(num_gpus)
-    #pragma acc parallel loop vector_length(128)
-    for(int i=0; i<nrows; ++i ){
-        float val=0.0f;
-        #pragma acc loop vector reduction(+:val)
-        for(int n=0; n<nrows; ++n)
-            val += a[n*nrows+i]*v[i*nrows+n] + x[i*nrows+n];
+    #pragma omp parallel for num_threads(num_threads)
+    for(int z=0; z<nrows*nrows; ++z ){
+        #pragma acc parallel loop 
+        for(int i=0; i<nrows; ++i ){
+            for(int n=0; n<nrows; ++n){
+                val += a[n*nrows+i]*v[i*nrows+n] + x[i*nrows+n];
+            }
 
-        x[i] = val;
+            x[i] = val;
+        }
     }
+
 } 
 
 int main(int argc, char const *argv[]) {
-    print_cuda_properties();
-    const int nrows = 1 << 20;
+    //print_cuda_properties();
+    const int nrows = 1000;
 
-    float* a[nrows*nrows], v[nrows*nrows], x[nrows*nrows];
+    std::vector<float> a(nrows*nrows), v(nrows*nrows), x(nrows*nrows);
+
 
     #pragma acc parallel loop vector_length(128)
     for(int i=0; i<nrows; ++i ){
         for(int j=0; j<nrows; ++j ){
-            a[i*nrows+j] = random();
-            v[i*nrows+j] = random();
-            x[i*nrows+j] = random();
+            a[i*nrows+j] = static_cast<float>(random());
+            v[i*nrows+j] = static_cast<float>(random());
+            x[i*nrows+j] = static_cast<float>(random());
         }
     }
 
