@@ -13,8 +13,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -fopenmp ${CMAKE_EXE
 option(TARGET_GPU "Enable OpenACC GPU       Support" OFF)
 if(TARGET_GPU)
     find_package(OpenACC REQUIRED)
-    set(CMAKE_C_FLAGS "${OpenACC_C_FLAGS} -Minfo=accel")
-    set(CMAKE_CXX_FLAGS "${OpenACC_CXX_FLAGS} -Minfo=accel")
+    add_definitions(-DTARGET_GPU)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenACC_C_FLAGS} -Minfo=accel")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenACC_CXX_FLAGS} -Minfo=accel")
     set(TARGET_STDPAR "-acc=gpu")
 endif()
 
